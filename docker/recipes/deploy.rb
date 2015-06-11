@@ -46,10 +46,10 @@ node[:deploy].each do |application, deploy|
   dockeropts = ""
   dockerenvs = ""
   deploy[:environment_variables].each do |key, value|
-    if key.start_with?('--')
-      dockeropts = dockeropts + " " + key + "=" + value
-    elseif key.start_with?('-')
-      dockeropts = dockeropts + " " + key + " " + value
+    if key.start_with?('__')
+      dockeropts = dockeropts + " --" + key[2..-1] + "=" + value
+    elseif key.start_with?('_')
+      dockeropts = dockeropts + " -" + key[1..-1] + " " + value
     else
       dockerenvs = dockerenvs + " -e " + key + "=" + value
     end
