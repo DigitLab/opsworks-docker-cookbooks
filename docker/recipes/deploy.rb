@@ -2,7 +2,7 @@ include_recipe 'deploy'
 
 node[:deploy].each do |application, deploy|
 
-  if node[:opsworks][:instance][:layers].first != deploy[:environment_variables][:layer]
+  unless node[:opsworks][:instance][:layers]include?(deploy[:environment_variables][:layer])
     Chef::Log.info("Skipping docker::deploy application #{application} as it is not deployed to this layer")
     next
   end
