@@ -2,7 +2,7 @@ include_recipe 'deploy'
 
 node[:deploy].each do |application, deploy|
 
-  unless node[:opsworks][:instance][:layers]include?(deploy[:environment_variables][:layer])
+  unless node[:opsworks][:instance][:layers].include?(deploy[:environment_variables][:layer])
     Chef::Log.info("Skipping docker::deploy application #{application} as it is not deployed to this layer")
     next
   end
@@ -48,7 +48,7 @@ node[:deploy].each do |application, deploy|
   deploy[:environment_variables].each do |key, value|
     if key.start_with?('__')
       dockeropts = dockeropts + " --" + key[2..-1] + "=" + value
-    elseif key.start_with?('_')
+    elsif key.start_with?('_')
       dockeropts = dockeropts + " -" + key[1..-1] + " " + value
     else
       dockerenvs = dockerenvs + " -e " + key + "=" + value
