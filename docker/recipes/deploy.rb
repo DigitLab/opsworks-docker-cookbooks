@@ -18,7 +18,15 @@ node[:deploy].each do |application, deploy|
     app application
   end
 
-  bash "docker-cleanup" do
+  bash "docker-build" do
+    user "root"
+    cwd "#{deploy[:deploy_to]}/current"
+    code <<-EOH
+     docker build -t=#{deploy[:application]} . > #{deploy[:application]}-docker.out
+    EOH
+  end
+
+  bash "docker-stop" do
     user "root"
     code <<-EOH
       if docker ps | grep #{deploy[:application]};
@@ -28,18 +36,6 @@ node[:deploy].each do |application, deploy|
         docker rm #{deploy[:application]}
         sleep 3
       fi
-      if docker images | grep #{deploy[:application]};
-      then
-        docker rmi #{deploy[:application]}
-      fi
-    EOH
-  end
-
-  bash "docker-build" do
-    user "root"
-    cwd "#{deploy[:deploy_to]}/current"
-    code <<-EOH
-     docker build -t=#{deploy[:application]} . > #{deploy[:application]}-docker.out
     EOH
   end
 
@@ -60,6 +56,13 @@ node[:deploy].each do |application, deploy|
     cwd "#{deploy[:deploy_to]}/current"
     code <<-EOH
       docker run #{dockeropts} #{dockerenvs} --name #{deploy[:application]} -d #{deploy[:application]}
+    EOH
+  end
+
+  bash "docker-cleanup" do
+    user "root"
+    code <<-EOH
+     docker rmi -f $(docker images | grep "<none>" | awk "{print \$3}")
     EOH
   end
 
