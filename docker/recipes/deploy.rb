@@ -62,7 +62,10 @@ node[:deploy].each do |application, deploy|
   bash "docker-cleanup" do
     user "root"
     code <<-EOH
-     docker rmi -f $(docker images | grep "<none>" | awk "{print \$3}")
+     if docker images | grep "<none>";
+     then
+       docker rmi $(docker images | grep "<none>" | awk "{print \$3}")
+     fi
     EOH
   end
 
